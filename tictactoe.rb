@@ -27,13 +27,6 @@ class Tictactoe
     @messenger.puts @board.map { |row| row.map { |e| e || " " }.join("|") }.join("\n")
   end
 
-  def get_move_position
-    @messenger.print "\nPlayer #{@current_player}>> "
-    @row, @col = @messenger.gets.split.map { |e| e.to_i }
-    @messenger.puts
-    exit unless @col
-  end
-
   def try_move
     begin
       cell_contents = @board.fetch(@row).fetch(@col)
@@ -49,17 +42,27 @@ class Tictactoe
     @board[@row][@col] = @current_player
   end
 
-  def start
+  def display_prompt
     print_board
-    get_move_position
+    @messenger.print "\nPlayer #{@current_player}>> "
+  end
+
+  def play(input)
+    @row, @col = input.split.map { |e| e.to_i }
+    puts
     try_move
   rescue InvalidMove
-    start
   else
     exit_if_win
     exit_if_draw
     get_next_player
-    start
+  end
+
+  def play_loop
+    loop do
+      display_prompt
+      play gets
+    end
   end
 
   def wining_line?(line)
