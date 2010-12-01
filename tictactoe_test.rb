@@ -1,9 +1,11 @@
 require 'test/unit'
 require 'tictactoe'
+require 'stringio'
 
 class TictactoeTest < Test::Unit::TestCase
   def setup
-    @game = Tictactoe.new  
+    @messenger = StringIO.new
+    @game = Tictactoe.new(@messenger)
   end
 
   def test_board_diagonals
@@ -18,6 +20,12 @@ class TictactoeTest < Test::Unit::TestCase
     assert [:X, :O].include? a
     assert [:X, :O].include? b
     assert_equal a,c
+  end
+
+  def test_printing_empty_board
+    @game.print_board
+    empty_board = " | | \n | | \n | | \n"
+    assert_equal @messenger.string, empty_board
   end
   
 end

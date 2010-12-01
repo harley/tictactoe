@@ -1,9 +1,10 @@
 class Tictactoe
-  def initialize
+  def initialize(messenger = IO.new(0))
     @board  = [[nil,nil,nil],
                [nil,nil,nil],
                [nil,nil,nil]]
     @players = [:X, :O].cycle
+    @messenger = messenger
   end
 
   def left_diagonal
@@ -18,23 +19,27 @@ class Tictactoe
     @players.next 
   end
 
+  def print_board
+    @messenger.puts @board.map { |row| row.map { |e| e || " " }.join("|") }.join("\n")
+  end
+
   def start
     loop do
       current_player = get_next_player
-      puts @board.map { |row| row.map { |e| e || " " }.join("|") }.join("\n")
+      print_board
       print "\nPlayer #{current_player}>> "
       row, col = gets.split.map { |e| e.to_i }
-      puts
+      @messenger.puts
 
       begin
         cell_contents = @board.fetch(row).fetch(col)
       rescue IndexError
-        puts "Out of bounds, try another position"
+        @messenger.puts "Out of bounds, try another position"
         next
       end
       
       if cell_contents
-        puts "Cell occupied, try another position"
+        @messenger.puts "Cell occupied, try another position"
         next
       end
 
@@ -54,12 +59,12 @@ class Tictactoe
       end
 
       if win
-        puts "#{current_player} wins!"
+        @messenger.puts "#{current_player} wins!"
         exit
       end
 
       if @board.flatten.compact.length == 9
-        puts "It's a draw!"
+        @messenger.puts "It's a draw!"
         exit
       end
     end
