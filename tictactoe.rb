@@ -27,14 +27,14 @@ class Tictactoe
     @messenger.puts @board.map { |row| row.map { |e| e || " " }.join("|") }.join("\n")
   end
 
-  def get_player_input
+  def get_move_position
     @messenger.print "\nPlayer #{@current_player}>> "
     @row, @col = @messenger.gets.split.map { |e| e.to_i }
     @messenger.puts
     exit unless @col
   end
 
-  def place_at_cell
+  def try_move
     begin
       cell_contents = @board.fetch(@row).fetch(@col)
     rescue IndexError
@@ -51,9 +51,8 @@ class Tictactoe
 
   def start
     print_board
-    get_player_input
-
-    place_at_cell
+    get_move_position
+    try_move
   rescue InvalidMove
     start
   else
