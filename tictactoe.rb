@@ -8,6 +8,7 @@ class Tictactoe
                [nil,nil,nil]]
     @players = [:X, :O].cycle
     @messenger = messenger
+    get_next_player
   end
 
   def left_diagonal
@@ -33,7 +34,7 @@ class Tictactoe
     exit unless @col
   end
 
-  def place_at_cell(row, col)
+  def place_at_cell
     begin
       cell_contents = @board.fetch(@row).fetch(@col)
     rescue IndexError
@@ -49,24 +50,24 @@ class Tictactoe
   end
 
   def start
+    print_board
+    get_player_input
+
+    place_at_cell
+  rescue InvalidMove
+    start
+  else
+    exit_if_win
+    exit_if_draw
     get_next_player
-    loop do
-      print_board
-      get_player_input
-
-      begin
-        place_at_cell(@row,@col)
-      rescue InvalidMove
-        next
-      end
-
-      exit_if_win
-      exit_if_draw
-      get_next_player
-    end
+    start
   end
 
-  def exit_if_win
+  def wining_line?(line)
+    line.all? { |row,col| @board[row][col] == @current_player }
+  end
+
+  def relevant_lines
     lines = []
 
     [left_diagonal, right_diagonal].each do |line|
@@ -75,12 +76,10 @@ class Tictactoe
 
     lines << (0..2).map { |c1| [@row, c1] }
     lines << (0..2).map { |r1| [r1, @col] }
+  end
 
-    win = lines.any? do |line|
-      line.all? { |row,col| @board[row][col] == @current_player }
-    end
-
-    if win
+  def exit_if_win
+    if relevant_lines.any?{|line| wining_line?(line)}
       @messenger.puts "#{@current_player} wins!"
       exit
     end
