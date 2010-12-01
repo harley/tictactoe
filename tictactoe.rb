@@ -25,20 +25,19 @@ class Tictactoe
 
   def get_player_input
     @messenger.print "\nPlayer #{@current_player}>> "
-    row, col = @messenger.gets.split.map { |e| e.to_i }
+    @row, @col = @messenger.gets.split.map { |e| e.to_i }
     @messenger.puts
-    exit unless col
-    [row, col]
+    exit unless @col
   end
 
   def start
     get_next_player
     loop do
       print_board
-      row, col = get_player_input
+      get_player_input
 
       begin
-        cell_contents = @board.fetch(row).fetch(col)
+        cell_contents = @board.fetch(@row).fetch(@col)
       rescue IndexError
         @messenger.puts "Out of bounds, try another position"
         next
@@ -49,31 +48,38 @@ class Tictactoe
         next
       end
 
-      @board[row][col] = @current_player
+      @board[@row][@col] = @current_player
 
-      lines = []
-
-      [left_diagonal, right_diagonal].each do |line|
-        lines << line if line.include?([row,col])
-      end
-
-      lines << (0..2).map { |c1| [row, c1] }
-      lines << (0..2).map { |r1| [r1, col] }
-
-      win = lines.any? do |line|
-        line.all? { |row,col| @board[row][col] == @current_player }
-      end
-
-      if win
-        @messenger.puts "#{@current_player} wins!"
-        exit
-      end
-
-      if @board.flatten.compact.length == 9
-        @messenger.puts "It's a draw!"
-        exit
-      end
+      exit_if_win
+      exit_if_draw
       get_next_player
+    end
+  end
+
+  def exit_if_win
+    lines = []
+
+    [left_diagonal, right_diagonal].each do |line|
+      lines << line if line.include?([@row,@col])
+    end
+
+    lines << (0..2).map { |c1| [@row, c1] }
+    lines << (0..2).map { |r1| [r1, @col] }
+
+    win = lines.any? do |line|
+      line.all? { |row,col| @board[row][col] == @current_player }
+    end
+
+    if win
+      @messenger.puts "#{@current_player} wins!"
+      exit
+    end
+  end
+
+  def exit_if_draw
+    if @board.flatten.compact.length == 9
+      @messenger.puts "It's a draw!"
+      exit
     end
   end
 end
