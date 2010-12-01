@@ -1,6 +1,8 @@
 class Tictactoe
   class InvalidMove < StandardError
   end
+  class GameOver < StandardError
+  end
 
   def initialize(messenger = IO.new(0))
     @board  = [[nil,nil,nil],
@@ -49,7 +51,7 @@ class Tictactoe
 
   def play(input)
     @row, @col = input.split.map { |e| e.to_i }
-    puts
+    @messenger.puts
     try_move
   rescue InvalidMove
   else
@@ -59,10 +61,10 @@ class Tictactoe
   end
 
   def play_loop
-    loop do
-      display_prompt
-      play gets
-    end
+    display_prompt
+    play gets
+    play_loop
+  rescue GameOver
   end
 
   def wining_line?(line)
@@ -83,14 +85,14 @@ class Tictactoe
   def exit_if_win
     if relevant_lines.any?{|line| wining_line?(line)}
       @messenger.puts "#{@current_player} wins!"
-      exit
+      raise GameOver
     end
   end
 
   def exit_if_draw
     if @board.flatten.compact.length == 9
       @messenger.puts "It's a draw!"
-      exit
+      raise GameOver
     end
   end
 end
