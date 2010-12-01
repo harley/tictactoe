@@ -1,4 +1,7 @@
 class Tictactoe
+  class InvalidMove < StandardError
+  end
+
   def initialize(messenger = IO.new(0))
     @board  = [[nil,nil,nil],
                [nil,nil,nil],
@@ -30,6 +33,21 @@ class Tictactoe
     exit unless @col
   end
 
+  def place_at_cell(row, col)
+    begin
+      cell_contents = @board.fetch(@row).fetch(@col)
+    rescue IndexError
+      @messenger.puts "Out of bounds, try another position"
+      raise InvalidMove
+    end
+    
+    if cell_contents
+      @messenger.puts "Cell occupied, try another position"
+      raise InvalidMove
+    end
+    @board[@row][@col] = @current_player
+  end
+
   def start
     get_next_player
     loop do
@@ -37,18 +55,10 @@ class Tictactoe
       get_player_input
 
       begin
-        cell_contents = @board.fetch(@row).fetch(@col)
-      rescue IndexError
-        @messenger.puts "Out of bounds, try another position"
+        place_at_cell(@row,@col)
+      rescue InvalidMove
         next
       end
-      
-      if cell_contents
-        @messenger.puts "Cell occupied, try another position"
-        next
-      end
-
-      @board[@row][@col] = @current_player
 
       exit_if_win
       exit_if_draw
